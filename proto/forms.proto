@@ -1,0 +1,293 @@
+syntax = "proto3";
+
+package forms;
+
+// ===============================
+// TEENUSED (Services)
+// ===============================
+
+service FormsService {
+  // Forms operations
+  rpc CreateForm(CreateFormRequest) returns (Form);
+  rpc GetForm(GetFormRequest) returns (Form);
+  rpc ListForms(ListFormsRequest) returns (ListFormsResponse);
+  rpc UpdateForm(UpdateFormRequest) returns (Form);
+  rpc DeleteForm(DeleteFormRequest) returns (DeleteFormResponse);
+}
+
+service QuestionsService {
+  // Questions operations
+  rpc CreateQuestion(CreateQuestionRequest) returns (Question);
+  rpc GetQuestion(GetQuestionRequest) returns (Question);
+  rpc ListQuestions(ListQuestionsRequest) returns (ListQuestionsResponse);
+  rpc UpdateQuestion(UpdateQuestionRequest) returns (Question);
+  rpc DeleteQuestion(DeleteQuestionRequest) returns (DeleteQuestionResponse);
+}
+
+service ResponsesService {
+  // Responses operations
+  rpc CreateResponse(CreateResponseRequest) returns (Response);
+  rpc GetResponse(GetResponseRequest) returns (Response);
+  rpc ListResponses(ListResponsesRequest) returns (ListResponsesResponse);
+  rpc UpdateResponse(UpdateResponseRequest) returns (Response);
+  rpc DeleteResponse(DeleteResponseRequest) returns (DeleteResponseResponse);
+}
+
+service UsersService {
+  // Users operations
+  rpc CreateUser(CreateUserRequest) returns (User);
+  rpc GetUser(GetUserRequest) returns (User);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (User);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+}
+
+service SessionsService {
+  // Authentication operations
+  rpc CreateSession(CreateSessionRequest) returns (Session);
+  rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse);
+  rpc ValidateSession(ValidateSessionRequest) returns (User);
+}
+
+// ===============================
+// SÕNUMID (Messages)
+// ===============================
+
+// Form related messages
+message Form {
+  int32 id = 1;
+  int32 userId = 2;
+  string title = 3;
+  string description = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message CreateFormRequest {
+  string title = 1;
+  string description = 2;
+  string token = 3; // Authentication token
+}
+
+message GetFormRequest {
+  string formId = 1;
+  string token = 2;
+}
+
+message ListFormsRequest {
+  string token = 1;
+}
+
+message ListFormsResponse {
+  repeated Form forms = 1;
+}
+
+message UpdateFormRequest {
+  string formId = 1;
+  string title = 2;
+  string description = 3;
+  string token = 4;
+}
+
+message DeleteFormRequest {
+  string formId = 1;
+  string token = 2;
+}
+
+message DeleteFormResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Question related messages
+message Question {
+  string id = 1;
+  string text = 2;
+  string type = 3; // shorttext, paragraph, multiplechoice, checkbox, dropdown
+  repeated string options = 4;
+  bool required = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message CreateQuestionRequest {
+  string formId = 1;
+  string text = 2;
+  string type = 3;
+  repeated string options = 4;
+  bool required = 5;
+  string token = 6;
+}
+
+message GetQuestionRequest {
+  string formId = 1;
+  string questionId = 2;
+  string token = 3;
+}
+
+message ListQuestionsRequest {
+  string formId = 1;
+  string token = 2;
+}
+
+message ListQuestionsResponse {
+  repeated Question questions = 1;
+}
+
+message UpdateQuestionRequest {
+  string formId = 1;
+  string questionId = 2;
+  string text = 3;
+  string type = 4;
+  repeated string options = 5;
+  bool required = 6;
+  string token = 7;
+}
+
+message DeleteQuestionRequest {
+  string formId = 1;
+  string questionId = 2;
+  string token = 3;
+}
+
+message DeleteQuestionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Response related messages
+message Answer {
+  string questionId = 1;
+  string answer = 2;
+}
+
+message Response {
+  string id = 1;
+  string formId = 2;
+  string respondentName = 3;
+  string respondentEmail = 4;
+  repeated Answer answers = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message CreateResponseRequest {
+  string formId = 1;
+  repeated Answer answers = 2;
+  string respondentName = 3;
+  string respondentEmail = 4;
+  string token = 5;
+}
+
+message GetResponseRequest {
+  string formId = 1;
+  string responseId = 2;
+  string token = 3;
+}
+
+message ListResponsesRequest {
+  string formId = 1;
+  string token = 2;
+}
+
+message ListResponsesResponse {
+  repeated Response responses = 1;
+}
+
+message UpdateResponseRequest {
+  string formId = 1;
+  string responseId = 2;
+  repeated Answer answers = 3;
+  string respondentName = 4;
+  string respondentEmail = 5;
+  string token = 6;
+}
+
+message DeleteResponseRequest {
+  string formId = 1;
+  string responseId = 2;
+  string token = 3;
+}
+
+message DeleteResponseResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// User related messages
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+  bool passwordUpdated = 6;
+}
+
+message CreateUserRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+}
+
+message GetUserRequest {
+  string userId = 1;
+  string token = 2;
+}
+
+message ListUsersRequest {
+  string token = 1;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
+message UpdateUserRequest {
+  string userId = 1;
+  string email = 2;
+  string password = 3;
+  string name = 4;
+  string token = 5;
+}
+
+message DeleteUserRequest {
+  string userId = 1;
+  string token = 2;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Session related messages
+message Session {
+  string token = 1;
+  string userId = 2;
+}
+
+message CreateSessionRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message DeleteSessionRequest {
+  string token = 1;
+}
+
+message DeleteSessionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ValidateSessionRequest {
+  string token = 1;
+}
+
+// Error handling
+message ErrorResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated string details = 3;
+}
