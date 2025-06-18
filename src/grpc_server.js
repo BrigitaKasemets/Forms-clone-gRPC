@@ -58,8 +58,6 @@ server.bindAsync(
     console.log('   - ResponsesService');
     console.log('   - UsersService');
     console.log('   - SessionsService');
-    
-    server.start();
   }
 );
 

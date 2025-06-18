@@ -1,7 +1,7 @@
 {
   "name": "forms-clone-grpc-api",
   "version": "1.0.0",
-  "description": "Google Forms Clone gRPC API",
+  "description": "Google Forms Clone gRPC API with REST/gRPC comparison tests",
   "main": "src/grpc_server.js",
   "type": "module",
   "scripts": {
@@ -12,8 +12,10 @@
     "setup": "bash scripts/setup.sh",
     "run": "bash scripts/run.sh",
     "test-client": "bash scripts/test-client.sh",
-    "clean": "rm -rf node_modules package-lock.json forms.db",
-    "test": "npm run test-client"
+    "test": "bash tests/test.sh",
+    "test:comparison": "bash tests/test.sh",
+    "test:grpc-only": "npm run test-client",
+    "clean": "rm -rf node_modules package-lock.json forms.db"
   },
   "repository": {
     "type": "git",
@@ -33,7 +35,9 @@
     "protobuf",
     "nodejs",
     "jwt",
-    "crud"
+    "crud",
+    "rest-grpc-comparison",
+    "automated-testing"
   ],
   "author": "Brigita Kasemets",
   "license": "ISC",
@@ -44,7 +48,8 @@
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

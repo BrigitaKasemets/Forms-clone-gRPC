@@ -1,191 +1,112 @@
 # gRPC Forms API
 
-A Google Forms-like service implemented with gRPC, supporting full CRUD operations for forms, questions, responses, users, and authentication.
+## Project Overview
 
-## 🚀 Quick Start
+This project implements a Google Forms-like service using **gRPC** technology. It provides a complete backend API for creating and managing forms, questions, user responses, and user authentication.
 
-### Option 1: One-command setup and run
+### Technology Stack
+- **Runtime:** Node.js 18+ (ES modules)
+- **API Protocol:** gRPC with Protocol Buffers
+- **Database:** SQLite
+- **Authentication:** JWT tokens with bcrypt password hashing
+- **Testing:** Automated test suite with performance benchmarking
+
+## Quick Commands
+
+Get started with these essential commands:
+
 ```bash
-# Complete setup and start server
-npm run run
+npm run setup     # Setup project (install dependencies + initialize database)
+npm run run       # Start the gRPC server
+npm run client    # Test the gRPC connection
+npm test          # Run comprehensive tests (REST vs gRPC Comparison)
 ```
 
-### Option 2: Step-by-step setup
+## Installation and Setup
+
+### Quick Start
 ```bash
-# 1. Setup project (installs dependencies, initializes DB)
+# Clone the repository
+
+# Complete setup: install dependencies and initialize database
 npm run setup
-
-# 2. Start server
-npm run run
-
-# 3. Run client tests (in another terminal)
-npm run test-client
 ```
 
-## 📋 Available Scripts
-
-### Setup & Management
-- `npm run setup` - Complete project setup from scratch
-- `npm run run` - Start the gRPC server (includes all checks)
-- `npm run test-client` - Run comprehensive client tests
-
-### Development
-- `npm start` - Start server directly
-- `npm run dev` - Start server with nodemon (auto-restart)
-- `npm run client` - Run client tests directly
-- `npm run init-db` - Initialize/reset database
-- `npm run clean` - Clean all generated files
-
-### Scripts Directory
-All setup and management scripts are located in the `scripts/` directory:
-- `scripts/setup.sh` - Project setup script
-- `scripts/run.sh` - Server startup script  
-- `scripts/test-client.sh` - Client testing script
-
-### Käivitamine
-
-1. Käivita gRPC server:
+### Manual Setup
 ```bash
+# Install dependencies
+npm install
+
+# Initialize database
+npm run init-db
+```
+
+## Running the Project
+
+### Start the Server
+
+```bash
+# Option 1: Start with all pre-checks (recommended)
+npm run run
+
+# Option 2: Start directly
 npm start
-# või arendusrežiimis:
+
+# Option 3: Development mode with auto-restart
 npm run dev
 ```
 
-2. Testi ühendust:
+The server will start on port **50051** by default.
+
+### Verify Installation
+
 ```bash
+# Test the gRPC connection
 npm run client
 ```
 
-## API Dokumentatsioon
 
-### Saadaolevad teenused
-
-#### 1. FormsService
-- `CreateForm` - Loo uus vorm
-- `GetForm` - Hangi vorm ID järgi
-- `ListForms` - Hangi kõik kasutaja vormid
-- `UpdateForm` - Uuenda vorm
-- `DeleteForm` - Kustuta vorm
-
-#### 2. QuestionsService
-- `CreateQuestion` - Lisa küsimus vormile
-- `GetQuestion` - Hangi küsimus ID järgi
-- `ListQuestions` - Hangi vormi kõik küsimused
-- `UpdateQuestion` - Uuenda küsimus
-- `DeleteQuestion` - Kustuta küsimus
-
-#### 3. ResponsesService
-- `CreateResponse` - Loo vastus vormile
-- `GetResponse` - Hangi vastus ID järgi
-- `ListResponses` - Hangi vormi kõik vastused
-- `UpdateResponse` - Uuenda vastus
-- `DeleteResponse` - Kustuta vastus
-
-#### 4. UsersService
-- `CreateUser` - Registreeri uus kasutaja
-- `GetUser` - Hangi kasutaja andmed
-- `ListUsers` - Hangi kõik kasutajad
-- `UpdateUser` - Uuenda kasutaja
-- `DeleteUser` - Kustuta kasutaja
-
-#### 5. SessionsService
-- `CreateSession` - Logi sisse (loo sessioon)
-- `DeleteSession` - Logi välja (kustuta sessioon)
-- `ValidateSession` - Valideeri sessioon
-
-### Autentimine
-
-Kõik teenused (välja arvatud `CreateUser` ja `CreateSession`) nõuavad JWT tokenit:
-
-```javascript
-const request = {
-  // ... muud parameetrid
-  token: 'your_jwt_token_here'
-};
+### Database Operations
+```bash
+npm run init-db     # Initialize/reset the SQLite database
 ```
 
-## Näited
-
-### Kliendi loomine (JavaScript)
-
-```javascript
-import grpc from '@grpc/grpc-js';
-import protoLoader from '@grpc/proto-loader';
-
-// Laadi proto fail
-const packageDefinition = protoLoader.loadSync('proto/forms.proto', {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
-});
-
-const formsProto = grpc.loadPackageDefinition(packageDefinition).forms;
-
-// Loo klient
-const client = new formsProto.FormsService('localhost:50051', 
-  grpc.credentials.createInsecure());
-
-// Kasuta teenust
-client.ListForms({ token: 'your_token' }, (error, response) => {
-  if (error) {
-    console.error('Error:', error);
-  } else {
-    console.log('Forms:', response.forms);
-  }
-});
+### Testing
+```bash
+npm run client          # Run basic gRPC client demonstration
+npm run test-client     # Run comprehensive gRPC client tests
+npm test               # Run REST vs gRPC comparison tests
+npm run test:comparison # Same as 'npm test'
+npm run test:grpc-only  # Test only gRPC functionality (same as test-client)
 ```
 
-## Arendus
-
-### Projekti struktuur
-
-- `proto/` - Protocol Buffer definitsioonid
-- `src/services/` - gRPC teenuste implementatsioonid
-- `src/models/` - Andmemudelid
-- `src/db/` - Andmebaasi seadistus
-- `src/utils/` - Abifunktsioonid
-
-### Skriptid
-
-- `npm start` - Käivita server
-- `npm run dev` - Käivita arendusrežiimis (nodemon)
-- `npm run init-db` - Initsialiseeri andmebaas
-- `npm run client` - Käivita test klient
-- `npm test` - Käivita testid
-
-## 📁 Project Structure
-
+### Setup and Maintenance
+```bash
+npm run setup       # Complete project setup (dependencies + database)
+npm run clean       # Remove node_modules, package-lock.json, and database
 ```
-Forms-clone-gRPC/
-├── client/                    # gRPC klient
-│   └── grpc_client.js        # Üksikasjalik test klient (22 testi)
-├── proto/                     # Protocol Buffer definitsioonid
-│   └── forms.proto           # gRPC teenuste definitsioonid
-├── scripts/                   # Automatiseeritud skriptid
-│   ├── setup.sh              # Projekti seadistamine
-│   ├── run.sh                # Serveri käivitamine
-│   └── test-client.sh        # Kliendi testide käivitamine
-├── src/
-│   ├── db/                   # Andmebaasi kihid
-│   │   ├── db.js            # SQLite ühendus
-│   │   └── init.js          # Andmebaasi seadistamine
-│   ├── models/              # Andmete mudelid
-│   │   ├── formsModel.js
-│   │   ├── questionsModel.js
-│   │   ├── responseModel.js
-│   │   └── userModel.js
-│   ├── services/            # gRPC teenuste implementatsioonid
-│   │   ├── formsService.js
-│   │   ├── questionsService.js
-│   │   ├── responsesService.js
-│   │   ├── sessionsService.js
-│   │   └── usersService.js
-│   ├── utils/               # Abifunktsioonid
-│   │   └── auth.js          # JWT autentimine
-│   └── grpc_server.js       # Peamine gRPC server
-├── forms.db                 # SQLite andmebaas (luuakse automaatselt)
-├── package.json
-└── README.md
+
+## Testing
+
+### Basic Client Testing
+```bash
+# Run gRPC client demonstration
+npm run client
+
+# Run comprehensive gRPC tests
+npm run test-client
 ```
+
+### Advanced Testing (REST vs gRPC Comparison)
+
+This project includes a unique feature that compares REST and gRPC API implementations:
+
+```bash
+# Run comprehensive comparison tests
+npm test
+```
+
+**Prerequisites for comparison tests:**
+1. Start your REST API on port 3000 ([separate project](https://github.com/BrigitaKasemets/forms-clone-api.git)) 
+2. Start this gRPC API on port 50051: `npm run run`
+
