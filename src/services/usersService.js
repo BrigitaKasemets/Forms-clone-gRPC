@@ -41,8 +41,7 @@ export const UsersServiceImpl = {
           email: user.email,
           name: user.name,
           createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-          passwordUpdated: false
+          updatedAt: user.updatedAt
         });
       } catch (error) {
         if (error.message === 'Email already exists') {

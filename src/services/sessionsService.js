@@ -1,6 +1,7 @@
 import grpc from '@grpc/grpc-js';
 import { userDb } from '../db/db.js';
 import { generateToken, verifyToken } from '../utils/auth.js';
+import { UserModel } from '../models/userModel.js';
 
 export const SessionsServiceImpl = {
   // Create a new session (login)
@@ -93,15 +94,28 @@ export const SessionsServiceImpl = {
         });
       }
 
-      // Return user info
-      callback(null, {
-        id: user.id.toString(),
-        email: user.email,
-        name: user.name,
-        createdAt: '',  // These fields would require an additional database query
-        updatedAt: '',  // If needed, you could fetch the full user object here
-        passwordUpdated: false
-      });
+      // Get full user data from database to include timestamps
+      try {
+        const fullUser = await UserModel.getById(user.id);
+        
+        // Return complete user info with timestamps
+        callback(null, {
+          id: fullUser.id,
+          email: fullUser.email,
+          name: fullUser.name,
+          createdAt: fullUser.createdAt,
+          updatedAt: fullUser.updatedAt
+        });
+      } catch (dbError) {
+        // Fallback if database query fails
+        callback(null, {
+          id: user.id.toString(),
+          email: user.email,
+          name: user.name,
+          createdAt: '',
+          updatedAt: ''
+        });
+      }
 
     } catch (error) {
       console.error('ValidateSession error:', error);

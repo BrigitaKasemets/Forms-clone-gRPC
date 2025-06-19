@@ -10,7 +10,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
+
+# Configuration
+SERVER_PORT=50051
+LOG_FILE="logs/server.log"
 
 # Function to print colored output
 print_status() {
@@ -27,6 +33,46 @@ print_warning() {
 
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_header() {
+    echo ""
+    echo -e "${CYAN}========================================${NC}"
+    echo -e "${CYAN}${BOLD}$1${NC}"
+    echo -e "${CYAN}========================================${NC}"
+    echo ""
+}
+
+# Initialize logging
+init_logging() {
+    mkdir -p logs
+    echo "=== gRPC SERVER STARTUP - $(date) ===" > "$LOG_FILE"
+}
+
+# Check if port is available
+check_port() {
+    if lsof -i :$SERVER_PORT >/dev/null 2>&1; then
+        print_warning "Port $SERVER_PORT is already in use"
+        echo "Finding process using port $SERVER_PORT..."
+        lsof -i :$SERVER_PORT
+        echo ""
+        read -p "Do you want to kill the existing process? (y/N): " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            print_status "Stopping existing process on port $SERVER_PORT..."
+            pkill -f "grpc_server.js" || true
+            sleep 2
+            if lsof -i :$SERVER_PORT >/dev/null 2>&1; then
+                print_error "Failed to stop existing process"
+                return 1
+            fi
+            print_success "Existing process stopped"
+        else
+            print_error "Cannot start server while port is in use"
+            return 1
+        fi
+    fi
+    return 0
 }
 
 # Check if Node.js is installed

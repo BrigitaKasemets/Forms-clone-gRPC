@@ -1,112 +1,125 @@
-# gRPC Forms API
+# gRPC Vormide API
 
-## Project Overview
+##  Installeerimine ja Seadistus
 
-This project implements a Google Forms-like service using **gRPC** technology. It provides a complete backend API for creating and managing forms, questions, user responses, and user authentication.
-
-### Technology Stack
-- **Runtime:** Node.js 18+ (ES modules)
-- **API Protocol:** gRPC with Protocol Buffers
-- **Database:** SQLite
-- **Authentication:** JWT tokens with bcrypt password hashing
-- **Testing:** Automated test suite with performance benchmarking
-
-## Quick Commands
-
-Get started with these essential commands:
-
+### Kiire alustamine (ainult gRPC)
 ```bash
-npm run setup     # Setup project (install dependencies + initialize database)
-npm run run       # Start the gRPC server
-npm run client    # Test the gRPC connection
-npm test          # Run comprehensive tests (REST vs gRPC Comparison)
-```
+# Klooni repositoorium
+git clone https://github.com/BrigitaKasemets/Forms-clone-gRPC.git
+cd Forms-clone-gRPC
 
-## Installation and Setup
-
-### Quick Start
-```bash
-# Clone the repository
-
-# Complete setup: install dependencies and initialize database
+# Seadista ainult gRPC projekt
 npm run setup
 ```
 
-### Manual Setup
+### Täielik seadistus (gRPC + REST + jagatud andmebaas)
 ```bash
-# Install dependencies
+# Klooni mõlemad projektid
+git clone https://github.com/BrigitaKasemets/Forms-clone-gRPC.git
+git clone https://github.com/BrigitaKasemets/forms-clone-api.git FormsCloneApi
+cd Forms-clone-gRPC
+
+# Seadista mõlemad projektid + jagatud andmebaas
+./dev-helper.sh setup
+```
+
+### Käsitsi seadistusi stiilis teenus, mis kasutab **gRPC** tehnoloogiat. Võimaldab luua ja hallata vorme, küsimusi, vastuseid ning kasutajate autentimist.
+
+##  Kiirkäsud
+
+### Ainult gRPC API jaoks:
+```bash
+npm run setup     # Seadistab ainult gRPC projekti
+npm run run       # Käivitab gRPC serveri 
+npm run client    # Testib gRPC ühendust
+```
+
+### Mõlemad API-d + võrdlustestid:
+```bash
+./dev-helper.sh setup    # Seadistab gRPC + REST + jagatud andmebaas
+./dev-helper.sh start    # Käivitab mõlemad serverid
+npm test                 # Käivitab võrdlustestid (15/15 testid ✅)
+./dev-helper.sh stop
+```
+
+##  Installeerimine ja Seadistus
+
+### Kiire alustamine
+```bash
+# Klooni repositoorium
+git clone https://github.com/BrigitaKasemets/Forms-clone-gRPC.git
+cd Forms-clone-gRPC
+
+# Täielik seadistus: paigalda sõltuvused ja lähtesta andmebaas
+npm run setup
+```
+
+### Käsitsi seadistus
+```bash
+# Paigalda sõltuvused
 npm install
 
-# Initialize database
+# Lähtesta andmebaas
 npm run init-db
 ```
 
-## Running the Project
+##  Serveri Käivitamine
 
-### Start the Server
+### gRPC Server (port 50051)
 
 ```bash
-# Option 1: Start with all pre-checks (recommended)
+# Variant 1: Täielik käivitamine koos kontrollimisega (soovitatud)
 npm run run
 
-# Option 2: Start directly
+# Variant 2: Otsene käivitamine
 npm start
 
-# Option 3: Development mode with auto-restart
+# Variant 3: Arendusrežiim automaatse taaskäivitamisega
 npm run dev
 ```
 
-The server will start on port **50051** by default.
+Server käivitub vaikimisi **portil 50051**.
 
-### Verify Installation
+### Installatsiooni kontrollimine
 
 ```bash
-# Test the gRPC connection
+# Testi gRPC ühendust
 npm run client
 ```
 
+##  Testimine
 
-### Database Operations
+### gRPC API testimine
 ```bash
-npm run init-db     # Initialize/reset the SQLite database
+npm run client          # Põhiline gRPC kliendi demonstratsioon  
+npm run test-client     # Täielikud gRPC testid (24/24 testi möödub!)
+npm run test:grpc-only  # Sama mis test-client
 ```
 
-### Testing
-```bash
-npm run client          # Run basic gRPC client demonstration
-npm run test-client     # Run comprehensive gRPC client tests
-npm test               # Run REST vs gRPC comparison tests
-npm run test:comparison # Same as 'npm test'
-npm run test:grpc-only  # Test only gRPC functionality (same as test-client)
-```
+### REST vs gRPC Võrdlustestid
 
-### Setup and Maintenance
-```bash
-npm run setup       # Complete project setup (dependencies + database)
-npm run clean       # Remove node_modules, package-lock.json, and database
-```
-
-## Testing
-
-### Basic Client Testing
-```bash
-# Run gRPC client demonstration
-npm run client
-
-# Run comprehensive gRPC tests
-npm run test-client
-```
-
-### Advanced Testing (REST vs gRPC Comparison)
-
-This project includes a unique feature that compares REST and gRPC API implementations:
+See projekt sisaldab unikaalset funktsionaalsust, mis võrdleb REST ja gRPC API implementatsioone:
 
 ```bash
-# Run comprehensive comparison tests
+# Käivita täielikud võrdlustestid
 npm test
 ```
+**TÄHTIS: Võrdlustestide eeltingimused:**
 
-**Prerequisites for comparison tests:**
-1. Start your REST API on port 3000 ([separate project](https://github.com/BrigitaKasemets/forms-clone-api.git)) 
-2. Start this gRPC API on port 50051: `npm run run`
+1. **REST API peab olema käivitatud portil 3000** 
+   - Klooni: [forms-clone-api](https://github.com/BrigitaKasemets/forms-clone-api.git)
+   - Käivita: `npm run dev`
 
+2. **gRPC API peab olema käivitatud portil 50051**
+   - Käivita selles projektis: `npm run run`
+
+### Andmebaasi haldus
+```bash
+npm run init-db     # Lähtesta/loo SQLite andmebaas
+```
+
+### Projekti haldus
+```bash
+npm run setup       # Täielik projekti seadistus (sõltuvused + andmebaas)
+npm run clean       # Eemalda node_modules, package-lock.json ja andmebaas
+```
