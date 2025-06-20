@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Test configuration
 TEST_START_TIME=$(date +%s)
-LOG_FILE="tests/comparison-test-results.log"
+LOG_FILE="tests/test-results.log"
 REST_URL="http://localhost:3000"
 GRPC_HOST="localhost"
 GRPC_PORT="50051"

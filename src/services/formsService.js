@@ -36,9 +36,9 @@ export const FormsServiceImpl = {
       
       callback(null, {
         id: form.id,
-        userId: form.userId,
         title: form.title,
         description: form.description,
+        userId: form.userId,
         createdAt: form.createdAt,
         updatedAt: form.updatedAt
       });

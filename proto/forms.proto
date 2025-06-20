@@ -35,7 +35,7 @@ service ResponsesService {
 
 service UsersService {
   // Users operations
-  rpc CreateUser(CreateUserRequest) returns (User);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc GetUser(GetUserRequest) returns (User);
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
   rpc UpdateUser(UpdateUserRequest) returns (User);
@@ -222,6 +222,15 @@ message User {
   string createdAt = 4;
   string updatedAt = 5;
   bool passwordUpdated = 6;
+}
+
+// Response for user creation - matches REST API behavior
+message CreateUserResponse {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
 }
 
 message CreateUserRequest {

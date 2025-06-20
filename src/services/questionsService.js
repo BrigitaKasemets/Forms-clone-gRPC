@@ -6,7 +6,12 @@ export const QuestionsServiceImpl = {
   // Create a new question
   async CreateQuestion(call, callback) {
     try {
-      const { formId, text, type, options, required, token } = call.request;
+      const { formId, questionText, questionType, text, type, options, isRequired, required, token } = call.request;
+      
+      // Support both field naming conventions (questionText/questionType and text/type)
+      const finalText = questionText || text;
+      const finalType = questionType || type;
+      const finalRequired = isRequired !== undefined ? isRequired : (required || false);
       
       // Validate authentication
       const user = await verifyToken(token);
@@ -18,7 +23,7 @@ export const QuestionsServiceImpl = {
       }
 
       // Validate input
-      if (!formId || !text || !type) {
+      if (!formId || !finalText || !finalType) {
         return callback({
           code: grpc.status.INVALID_ARGUMENT,
           message: 'Form ID, question text, and question type are required'
@@ -27,10 +32,10 @@ export const QuestionsServiceImpl = {
 
       // Create question
       const questionData = {
-        text,
-        type,
+        text: finalText,
+        type: finalType,
         options: options || [],
-        required: required || false
+        required: finalRequired
       };
 
       const question = await QuestionModel.create(formId, questionData);

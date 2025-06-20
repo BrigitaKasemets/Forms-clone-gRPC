@@ -14,7 +14,6 @@
     "quick-start": "bash scripts/quick-start.sh",
     "test-client": "bash scripts/test-client.sh",
     "test": "bash tests/test.sh",
-    "test:comparison": "bash tests/test.sh",
     "test:grpc-only": "npm run test-client",
     "clean": "rm -rf node_modules package-lock.json forms.db REST-api/node_modules REST-api/package-lock.json REST-api/forms.db logs"
   },
@@ -48,9 +47,9 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
-    "node-fetch": "^3.3.2"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

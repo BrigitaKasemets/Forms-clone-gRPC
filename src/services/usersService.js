@@ -158,6 +158,8 @@ export const UsersServiceImpl = {
     try {
       const { userId, email, password, name, token } = call.request;
       
+      console.log('UpdateUser called with:', { userId, email, name, hasPassword: !!password, hasToken: !!token });
+      
       // Validate authentication
       const authenticatedUser = await verifyToken(token);
       if (!authenticatedUser) {
@@ -167,8 +169,16 @@ export const UsersServiceImpl = {
         });
       }
 
+      console.log('Authenticated user:', authenticatedUser.id);
+
+      // If no userId provided, use the authenticated user's ID (like REST API /users/me)
+      const targetUserId = userId || authenticatedUser.id.toString();
+      
+      console.log('Target user ID:', targetUserId, 'Authenticated user ID:', authenticatedUser.id.toString());
+
       // Only allow users to update their own data
-      if (authenticatedUser.id.toString() !== userId.toString()) {
+      if (authenticatedUser.id.toString() !== targetUserId.toString()) {
+        console.log('Permission denied: authenticated user', authenticatedUser.id.toString(), 'trying to update user', targetUserId.toString());
         return callback({
           code: grpc.status.PERMISSION_DENIED,
           message: 'You can only update your own user data'
@@ -205,7 +215,16 @@ export const UsersServiceImpl = {
       if (name !== undefined && name !== '') userData.name = name;
 
       try {
-        const user = await UserModel.update(userId, userData);
+        const user = await UserModel.update(targetUserId, userData);
+        
+        console.log('UpdateUser success, returning:', {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          passwordUpdated
+        });
         
         callback(null, {
           id: user.id,
@@ -216,6 +235,7 @@ export const UsersServiceImpl = {
           passwordUpdated
         });
       } catch (error) {
+        console.log('UpdateUser UserModel.update error:', error.message);
         if (error.message === 'User not found') {
           return callback({
             code: grpc.status.NOT_FOUND,
@@ -248,8 +268,11 @@ export const UsersServiceImpl = {
         });
       }
 
+      // If no userId provided, use the authenticated user's ID (like REST API /users/me)
+      const targetUserId = userId || authenticatedUser.id.toString();
+
       // Only allow users to delete their own account
-      if (authenticatedUser.id.toString() !== userId.toString()) {
+      if (authenticatedUser.id.toString() !== targetUserId.toString()) {
         return callback({
           code: grpc.status.PERMISSION_DENIED,
           message: 'You can only delete your own account'
@@ -257,7 +280,7 @@ export const UsersServiceImpl = {
       }
 
       try {
-        const deleted = await UserModel.delete(userId);
+        const deleted = await UserModel.delete(targetUserId);
         
         if (!deleted) {
           return callback({
