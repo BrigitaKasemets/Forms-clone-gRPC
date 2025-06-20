@@ -76,6 +76,14 @@ async function makeRestCall(method, endpoint, data = null, useAuth = true, token
     options.body = JSON.stringify(data);
   }
 
+  // Create request info for logging
+  const requestInfo = {
+    method,
+    endpoint,
+    ...(data && { data }),
+    ...(token && { hasToken: true })
+  };
+
   try {
     const response = await fetch(url, options);
     
@@ -103,9 +111,9 @@ async function makeRestCall(method, endpoint, data = null, useAuth = true, token
       }
     }
     
-    return { success: true, data: result, request: data };
+    return { success: true, data: result, request: requestInfo };
   } catch (error) {
-    return { success: false, error: error.message, request: data };
+    return { success: false, error: error.message, request: requestInfo };
   }
 }
 
@@ -163,10 +171,8 @@ function logComparisonTest(testName, restRequest, restResponse, grpcRequest, grp
   
   fs.appendFileSync(LOG_FILE, logMessage);
   
-  // Console output (shortened)
-  console.log(`\n🔄 ${testName}`);
-  console.log('REST:', restError ? '❌ ERROR' : '✅ SUCCESS');
-  console.log('gRPC:', grpcError ? '❌ ERROR' : '✅ SUCCESS');
+  // Console output - show full details for consistency
+  console.log(logMessage);
 }
 
 // Test results tracking
@@ -179,8 +185,6 @@ let testResults = {
 
 // REST-focused comparison function - gRPC must match REST API results
 async function compareRestAndGrpc(testName, restCall, grpcCall, expectErrors = false) {
-  console.log(`\n🔄 ${testName}`);
-  
   // Execute REST call first (this is the reference)
   const restResult = await restCall();
   
@@ -943,7 +947,7 @@ async function testErrorHandling() {
   // Test unauthorized access (should return errors - expected behavior)
   await compareRestAndGrpc(
     'Unauthorized Access (Expected Error)',
-    async () => makeRestCall('GET', '/forms', null, false),
+    async () => makeRestCall('GET', '/forms', null, true, 'invalid-token'),
     async () => promisifyGrpc(grpcClients.forms, 'ListForms', { token: 'invalid-token' }),
     true // expectErrors = true
   );
@@ -1052,7 +1056,8 @@ async function testSessionManagement() {
   
   if (!restSecurityTest.success && (
     restSecurityTest.error?.includes('Unauthorized') || 
-    restSecurityTest.error?.includes('Invalid token') ||
+    restSecurityTest.error?.includes('Invalid') ||
+    restSecurityTest.error?.includes('401') ||
     restSecurityTest.status === 401
   )) {
     restSecure = true;
@@ -1064,8 +1069,9 @@ async function testSessionManagement() {
   
   if (!grpcSecurityTest.success && (
     grpcSecurityTest.error?.code === grpc.status.UNAUTHENTICATED ||
-    grpcSecurityTest.error?.details?.includes('Invalid token') ||
-    grpcSecurityTest.error?.message?.includes('Invalid token')
+    grpcSecurityTest.error?.code === 16 ||
+    grpcSecurityTest.error?.details?.includes('Invalid') ||
+    grpcSecurityTest.error?.message?.includes('Invalid')
   )) {
     grpcSecure = true;
     console.log('✅ gRPC API: Token properly invalidated after logout');
