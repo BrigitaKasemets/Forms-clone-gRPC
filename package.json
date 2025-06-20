@@ -7,15 +7,16 @@
   "scripts": {
     "start": "node src/grpc_server.js",
     "dev": "nodemon src/grpc_server.js",
+    "stop": "bash scripts/stop.sh",
+    "status": "bash scripts/status.sh",
     "init-db": "node src/db/init.js",
     "client": "node client/grpc_client.js",
-    "setup": "bash scripts/setup.sh",
-    "run": "bash scripts/run.sh",
+    "quick-start": "bash scripts/quick-start.sh",
     "test-client": "bash scripts/test-client.sh",
     "test": "bash tests/test.sh",
     "test:comparison": "bash tests/test.sh",
     "test:grpc-only": "npm run test-client",
-    "clean": "rm -rf node_modules package-lock.json forms.db"
+    "clean": "rm -rf node_modules package-lock.json forms.db REST-api/node_modules REST-api/package-lock.json REST-api/forms.db logs"
   },
   "repository": {
     "type": "git",

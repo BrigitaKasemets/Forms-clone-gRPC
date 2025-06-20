@@ -1,125 +1,134 @@
 # gRPC Vormide API
 
-##  Installeerimine ja Seadistus
+Vormide halduse teenus, mis kasutab **gRPC** tehnoloogiat. Võimaldab luua ja hallata vorme, küsimusi, vastuseid ning kasutajate autentimist.
 
-### Kiire alustamine (ainult gRPC)
+## Kiire alustamine (Quick Start)
+
+Quick-start skript käivitab nüüd mõlemad serverid (gRPC + REST) ühekorraga!
+
 ```bash
 # Klooni repositoorium
 git clone https://github.com/BrigitaKasemets/Forms-clone-gRPC.git
 cd Forms-clone-gRPC
 
-# Seadista ainult gRPC projekt
-npm run setup
+# Installi kõik dependencyd ja käivita mõlemad serverid
+npm run quick-start
 ```
 
-### Täielik seadistus (gRPC + REST + jagatud andmebaas)
+
+## 💡 Kiirkäsud
+
+### 🎯 Peamised käsud:
 ```bash
-# Klooni mõlemad projektid
-git clone https://github.com/BrigitaKasemets/Forms-clone-gRPC.git
-git clone https://github.com/BrigitaKasemets/forms-clone-api.git FormsCloneApi
-cd Forms-clone-gRPC
-
-# Seadista mõlemad projektid + jagatud andmebaas
-./dev-helper.sh setup
+npm run quick-start  # 🚀 KÕIK ÜHES: clean + setup + start mõlemad serverid
+npm run status      # 📊 Kontrolli serverite seisundit
+npm stop            # � Peata kõik serverid
 ```
 
-### Käsitsi seadistusi stiilis teenus, mis kasutab **gRPC** tehnoloogiat. Võimaldab luua ja hallata vorme, küsimusi, vastuseid ning kasutajate autentimist.
-
-##  Kiirkäsud
-
-### Ainult gRPC API jaoks:
+### 🔧 Arenduseks:
 ```bash
-npm run setup     # Seadistab ainult gRPC projekti
-npm run run       # Käivitab gRPC serveri 
-npm run client    # Testib gRPC ühendust
+npm start           # Käivita ainult gRPC server
+npm run dev         # gRPC server nodemon'iga (automaatne restart)
+npm run client      # Testi gRPC ühendust
 ```
 
-### Mõlemad API-d + võrdlustestid:
+### 🧪 Testimiseks:
 ```bash
-./dev-helper.sh setup    # Seadistab gRPC + REST + jagatud andmebaas
-./dev-helper.sh start    # Käivitab mõlemad serverid
-npm test                 # Käivitab võrdlustestid (15/15 testid ✅)
-./dev-helper.sh stop
+npm run test-client     # gRPC testid  
+npm run test           # REST vs gRPC võrdlustestid
+npm run test:grpc-only # Sama mis test-client
 ```
 
-##  Installeerimine ja Seadistus
-
-### Kiire alustamine
+### 🗄️ Andmebaasi haldus:
 ```bash
-# Klooni repositoorium
-git clone https://github.com/BrigitaKasemets/Forms-clone-gRPC.git
-cd Forms-clone-gRPC
-
-# Täielik seadistus: paigalda sõltuvused ja lähtesta andmebaas
-npm run setup
+npm run init-db    # Lähtesta andmebaas
+npm run clean      # Kustuta kõik (node_modules, DB, logs)
 ```
 
-### Käsitsi seadistus
+## 📋 Detailne kasutusjuhend
+
+### 🔧 Serveri käivitamine
+
+#### Mõlemad serverid (gRPC + REST):
 ```bash
-# Paigalda sõltuvused
-npm install
-
-# Lähtesta andmebaas
-npm run init-db
+npm run quick-start    # Kõige lihtsam - teeb kõike automaatselt
 ```
 
-##  Serveri Käivitamine
-
-### gRPC Server (port 50051)
-
+#### Ainult gRPC server:
 ```bash
-# Variant 1: Täielik käivitamine koos kontrollimisega (soovitatud)
-npm run run
-
-# Variant 2: Otsene käivitamine
-npm start
-
-# Variant 3: Arendusrežiim automaatse taaskäivitamisega
-npm run dev
+npm start             # Otsene käivitamine
+npm run dev           # Arendusrežiim (nodemon)
 ```
 
-Server käivitub vaikimisi **portil 50051**.
-
-### Installatsiooni kontrollimine
-
+#### Serverite kontroll:
 ```bash
-# Testi gRPC ühendust
-npm run client
+npm run status        # Näita kõigi serverite seisundit
+npm stop             # Peata kõik serverid
 ```
 
-##  Testimine
+### 🧪 Testimine
 
-### gRPC API testimine
+#### gRPC API testimine:
 ```bash
 npm run client          # Põhiline gRPC kliendi demonstratsioon  
 npm run test-client     # Täielikud gRPC testid (24/24 testi möödub!)
 npm run test:grpc-only  # Sama mis test-client
 ```
 
-### REST vs gRPC Võrdlustestid
+#### REST vs gRPC võrdlustestid:
 
 See projekt sisaldab unikaalset funktsionaalsust, mis võrdleb REST ja gRPC API implementatsioone:
 
 ```bash
 # Käivita täielikud võrdlustestid
-npm test
+npm run test
 ```
-**TÄHTIS: Võrdlustestide eeltingimused:**
 
-1. **REST API peab olema käivitatud portil 3000** 
-   - Klooni: [forms-clone-api](https://github.com/BrigitaKasemets/forms-clone-api.git)
-   - Käivita: `npm run dev`
+**MÄRKUS:** Võrdlustestide jaoks peavad mõlemad serverid töötama:
+- **gRPC server** - port 50051 (`npm run quick-start` käivitab automaatselt)
+- **REST server** - port 3000 (`npm run quick-start` käivitab automaatselt)
 
-2. **gRPC API peab olema käivitatud portil 50051**
-   - Käivita selles projektis: `npm run run`
+### 🗄️ Andmebaasi haldus
 
-### Andmebaasi haldus
 ```bash
-npm run init-db     # Lähtesta/loo SQLite andmebaas
+npm run init-db       # Lähtesta/loo SQLite andmebaas
+npm run clean         # Eemalda kõik (node_modules, DBs, logs)
 ```
 
-### Projekti haldus
+### 📊 Monitooring
+
 ```bash
-npm run setup       # Täielik projekti seadistus (sõltuvused + andmebaas)
-npm run clean       # Eemalda node_modules, package-lock.json ja andmebaas
+npm run status        # Detailne serverite seisund:
+                     # - Protsesside info (PID, mälu, käivitusaeg)
+                     # - Portide kontroll
+                     # - Andmebaasi seisund  
+                     # - Logifailide info
 ```
+
+## 🏗️ Projekti struktuur
+
+```
+Forms-clone-gRPC/
+├── src/              # gRPC serveri kood
+├── REST-api/         # REST API serveri kood  
+├── proto/            # Protocol Buffer definitsioonid
+├── client/           # gRPC kliendi näited
+├── scripts/          # Automatiseeritud skriptid
+├── tests/            # Testid ja võrdlused
+└── logs/             # Serverite logid
+```
+
+## 🚀 Skriptide ülevaade
+
+| Skript | Kirjeldus |
+|--------|-----------|
+| `npm run quick-start` | **PEAMINE** - Clean install + mõlemad serverid |
+| `npm start` | Käivita ainult gRPC server |
+| `npm run dev` | gRPC server nodemon'iga |
+| `npm stop` | Peata kõik serverid |
+| `npm run status` | Kontrolli serverite seisundit |
+| `npm run client` | Testi gRPC ühendust |
+| `npm run test-client` | gRPC API testid |
+| `npm run test` | REST vs gRPC võrdlustestid |
+| `npm run init-db` | Lähtesta andmebaas |
+| `npm run clean` | Kustuta kõik failid (clean install) |
