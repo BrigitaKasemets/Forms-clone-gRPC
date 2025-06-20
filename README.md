@@ -36,6 +36,7 @@ npm run client      # Testi gRPC ühendust
 ```bash
 npm run test-client     # gRPC testid  
 npm run test           # REST vs gRPC võrdlustestid
+npm run test:security  # gRPC turvatestid (logout jne)
 ```
 
 ### 🗄️ Andmebaasi haldus:

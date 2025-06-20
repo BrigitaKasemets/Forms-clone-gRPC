@@ -1,6 +1,6 @@
 import grpc from '@grpc/grpc-js';
 import { userDb } from '../db/db.js';
-import { generateToken, verifyToken } from '../utils/auth.js';
+import { createSession, verifyToken, invalidateSession } from '../utils/auth.js';
 import { UserModel } from '../models/userModel.js';
 
 export const SessionsServiceImpl = {
@@ -27,11 +27,10 @@ export const SessionsServiceImpl = {
         });
       }
 
-      // Generate token
-      const token = generateToken(user.id);
+      // Generate and store session token securely
+      const token = await createSession(user.id);
 
-      // Store session (can be stored in database for more complex implementations)
-      // For this implementation we'll just return the token with userId
+      // Store session (now properly stored in database)
       
       callback(null, {
         token,
@@ -62,8 +61,8 @@ export const SessionsServiceImpl = {
         });
       }
 
-      // In a stateful session implementation, you would invalidate the token in the database
-      // For JWT-based auth, we can simply tell the client it was successful
+      // Actually invalidate the token in the database - this is crucial for security!
+      await invalidateSession(token);
       
       callback(null, {
         success: true,

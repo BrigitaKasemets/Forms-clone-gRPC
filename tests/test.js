@@ -1023,10 +1023,10 @@ async function testDataDeletion() {
   }
 }
 
-// Test 11: Session Management
+// Test 11: Session Management (improved with security verification)
 async function testSessionManagement() {
   console.log('\n==================================================');
-  console.log('🧪 TEST 11: SESSION MANAGEMENT');
+  console.log('🧪 TEST 11: SESSION MANAGEMENT & LOGOUT SECURITY');  
   console.log('==================================================');
   
   // Test logout/end session
@@ -1035,6 +1035,79 @@ async function testSessionManagement() {
     async () => makeRestCall('DELETE', '/sessions', null, true, restToken),
     async () => promisifyGrpc(grpcClients.sessions, 'DeleteSession', { token: grpcToken })
   );
+
+  // 🚨 SECURITY TEST: Verify tokens are invalidated after logout
+  console.log('\n🔒 SECURITY VERIFICATION: Testing if tokens are invalidated after logout...');
+  
+  // Try to access protected resources with the logged-out tokens
+  console.log('Testing REST API token invalidation...');
+  const restSecurityTest = await makeRestCall('GET', '/forms', null, true, restToken);
+  
+  console.log('Testing gRPC API token invalidation...');
+  const grpcSecurityTest = await promisifyGrpc(grpcClients.forms, 'ListForms', { token: grpcToken });
+  
+  // Both should fail with authentication errors
+  let restSecure = false;
+  let grpcSecure = false;
+  
+  if (!restSecurityTest.success && (
+    restSecurityTest.error?.includes('Unauthorized') || 
+    restSecurityTest.error?.includes('Invalid token') ||
+    restSecurityTest.status === 401
+  )) {
+    restSecure = true;
+    console.log('✅ REST API: Token properly invalidated after logout');
+  } else {
+    console.log('🚨 REST API: SECURITY VULNERABILITY - Token still valid after logout!');
+    console.log('REST response:', restSecurityTest);
+  }
+  
+  if (!grpcSecurityTest.success && (
+    grpcSecurityTest.error?.code === grpc.status.UNAUTHENTICATED ||
+    grpcSecurityTest.error?.details?.includes('Invalid token') ||
+    grpcSecurityTest.error?.message?.includes('Invalid token')
+  )) {
+    grpcSecure = true;
+    console.log('✅ gRPC API: Token properly invalidated after logout');
+  } else {
+    console.log('🚨 gRPC API: SECURITY VULNERABILITY - Token still valid after logout!');
+    console.log('gRPC response:', grpcSecurityTest);
+    
+    // If gRPC still allows access, show what data is accessible
+    if (grpcSecurityTest.success && grpcSecurityTest.data?.forms) {
+      console.log(`🚨 CRITICAL: User's private data accessible after logout!`);
+      console.log(`Forms visible: ${grpcSecurityTest.data.forms.length} forms`);
+      if (grpcSecurityTest.data.forms.length > 0) {
+        console.log('Sample accessible form:', {
+          id: grpcSecurityTest.data.forms[0].id,
+          title: grpcSecurityTest.data.forms[0].title,
+          description: grpcSecurityTest.data.forms[0].description
+        });
+      }
+    }
+  }
+  
+  // Log security test results
+  fs.appendFileSync(LOG_FILE, `\n=== LOGOUT SECURITY TEST ===\n`);
+  fs.appendFileSync(LOG_FILE, `REST API logout security: ${restSecure ? 'SECURE ✅' : 'VULNERABLE 🚨'}\n`);
+  fs.appendFileSync(LOG_FILE, `gRPC API logout security: ${grpcSecure ? 'SECURE ✅' : 'VULNERABLE 🚨'}\n`);
+  
+  if (!restSecure || !grpcSecure) {
+    fs.appendFileSync(LOG_FILE, `🚨 CRITICAL SECURITY VULNERABILITY DETECTED!\n`);
+    fs.appendFileSync(LOG_FILE, `Tokens remain valid after logout, allowing unauthorized access to private data.\n`);
+  }
+  
+  console.log('\n=== LOGOUT SECURITY SUMMARY ===');
+  console.log(`REST API logout: ${restSecure ? 'SECURE ✅' : 'VULNERABLE 🚨'}`);
+  console.log(`gRPC API logout: ${grpcSecure ? 'SECURE ✅' : 'VULNERABLE 🚨'}`);
+  
+  if (!grpcSecure && restSecure) {
+    console.log('\n🚨 CRITICAL SECURITY VULNERABILITY in gRPC API!');
+    console.log('   - gRPC logout claims success but doesn\'t invalidate token');
+    console.log('   - User\'s private forms remain accessible after logout');
+    console.log('   - Token remains usable until natural expiration (7 days)');
+    console.log('   - This allows unauthorized access to user\'s private data');
+  }
 }
 
 // Test 12: User Deletion

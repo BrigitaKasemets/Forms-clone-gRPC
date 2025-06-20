@@ -15,6 +15,7 @@
     "test-client": "bash scripts/test-client.sh",
     "test": "bash tests/test.sh",
     "test:grpc-only": "npm run test-client",
+    "test:security": "node tests/grpc-security-test.js",
     "clean": "rm -rf node_modules package-lock.json forms.db REST-api/node_modules REST-api/package-lock.json REST-api/forms.db logs"
   },
   "repository": {
