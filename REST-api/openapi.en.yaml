@@ -1,0 +1,964 @@
+openapi: 3.0.0
+info:
+  title: Google Forms Clone API
+  version: "1.0.0"
+  description: >
+    An example OpenAPI spec for a Google Forms–like service.  
+    Uses single-word plural nouns for resource names and /sessions for authentication.
+
+servers:
+  - url: /
+    description: Production server
+
+tags:
+  - name: forms
+    description: Operations related to managing forms
+  - name: questions
+    description: Operations related to managing questions within a form
+  - name: responses
+    description: Operations related to user responses to forms
+  - name: sessions
+    description: Operations related to user authentication (sessions)
+  - name: users
+    description: Operations related to managing users
+
+paths:
+  /sessions:
+    post:
+      tags:
+        - sessions
+      summary: Create a new session (login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionCreate"
+      responses:
+        "201":
+          description: Session created successfully (logged in)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      tags:
+        - sessions
+      summary: End current session (logout)
+      operationId: deleteSession
+      responses:
+        "200":
+          description: Session ended successfully (logged out)
+        "401":
+          description: Not authenticated
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms:
+    get:
+      tags:
+        - forms
+      summary: List all forms
+      operationId: listForms
+      responses:
+        "200":
+          description: A list of forms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Form"
+        "404":
+          description: No forms found          
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - forms
+      summary: Create a new form
+      operationId: createForm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormCreate"
+      responses:
+        "201":
+          description: Form created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}:
+    get:
+      tags:
+        - forms
+      summary: Get details of a specific form
+      operationId: getForm
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Form details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    patch:
+      tags:
+        - forms
+      summary: Update part of an existing form
+      operationId: updateForm
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormUpdate"
+      responses:
+        "200":
+          description: Form updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - forms
+      summary: Delete a form
+      operationId: deleteForm
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Form deleted
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/questions:
+    get:
+      tags:
+        - questions
+      summary: List all questions for a specific form
+      operationId: listQuestions
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of questions for the form
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - questions
+      summary: Create a new question in a specific form
+      operationId: createQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionCreate"
+      responses:
+        "201":
+          description: Question created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/questions/{questionId}:
+    get:
+      tags:
+        - questions
+      summary: Get details of a specific question
+      operationId: getQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Question details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Question not found
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    patch:
+      tags:
+        - questions
+      summary: Update part of an existing question
+      operationId: updateQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionUpdate"
+      responses:
+        "200":
+          description: Question updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Question not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - questions
+      summary: Delete a question
+      operationId: deleteQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Question deleted
+        "404":
+          description: Question not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/responses:
+    get:
+      tags:
+        - responses
+      summary: List all responses for a specific form
+      operationId: listResponses
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of responses for the form
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Response"
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - responses
+      summary: Create a response for a specific form
+      operationId: createResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseCreate"
+      responses:
+        "201":
+          description: Response created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: Form not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/responses/{responseId}:
+    get:
+      tags:
+        - responses
+      summary: Get details of a specific response
+      operationId: getResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: Response not found
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    patch:
+      tags:
+        - responses
+      summary: Update part of an existing response
+      operationId: updateResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseUpdate"
+      responses:
+        "200":
+          description: Response updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: Response not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - responses
+      summary: Delete a response
+      operationId: deleteResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Response deleted
+        "404":
+          description: Response not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /users:
+    get:
+      tags:
+        - users
+      summary: List all users
+      operationId: listUsers
+      responses:
+        "200":
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - users
+      summary: Create a new user (sign up)
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request - Validation failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password validation failed: Password must be at least 8 characters long, Password must contain at least 3 of the following: uppercase letters, lowercase letters, numbers, special characters"
+        "409":
+          description: User already exists with this email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Email already exists"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /users/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get details of a specific user
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+        "401":
+          description: Unauthorized
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+    patch:
+      tags:
+        - users
+      summary: Update part of an existing user
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+    delete:
+      tags:
+        - users
+      summary: Delete a user
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: User deleted
+        "404":
+          description: User not found
+        "401":
+          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+      - BearerAuth: [ ]
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+
+    SessionCreate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - email
+        - password
+
+    Session:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT or session token
+        userId:
+          type: string
+          description: Unique identifier for the authenticated user
+      required:
+        - token
+        - userId
+
+    FormCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - title
+
+    FormUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+
+    Form:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the form
+        userId:
+          type: integer
+          description: ID of the user who created the form
+        title:
+          type: string
+          description: Title of the form
+        description:
+          type: string
+          description: Description of the form
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+      required:
+        - id
+        - userId
+        - title
+        - description
+        - createdAt
+        - updatedAt
+
+    QuestionCreate:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [shorttext, paragraph, multiple choice, checkbox, dropdown]
+        options:
+          type: array
+          items:
+            type: string
+      required:
+        - text
+        - type
+
+    QuestionUpdate:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [shorttext, paragraph, multiple choice, checkbox, dropdown]
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        type:
+          type: string
+          enum: [shorttext, paragraph, multiple choice, checkbox, dropdown]
+        options:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - text
+        - type
+        - createdAt
+        - updatedAt
+
+    ResponseCreate:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+            required:
+              - questionId
+              - answer
+      required:
+        - answers
+
+    ResponseUpdate:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+
+    Response:
+      type: object
+      properties:
+        id:
+          type: string
+        formId:
+          type: string
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+            required:
+              - questionId
+              - answer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - formId
+        - answers
+        - createdAt
+        - updatedAt
+
+    UserCreate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        name:
+          type: string
+      required:
+        - email
+        - password
+        - name
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        name:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        passwordUpdated:
+            type: boolean
+      required:
+        - id
+        - email
+        - name
+        - createdAt
+        - updatedAt
+        - passwordUpdated

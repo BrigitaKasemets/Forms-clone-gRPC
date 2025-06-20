@@ -1,0 +1,40 @@
+{
+  "name": "forms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/formsClone.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/formsClone.js",
+    "dev": "nodemon src/formsClone.js",
+    "init-db": "node src/db/init.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrigitaKasemets/forms-clone-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrigitaKasemets/Forms/issues"
+  },
+  "homepage": "https://github.com/BrigitaKasemets/Forms#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.7.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.0.5",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

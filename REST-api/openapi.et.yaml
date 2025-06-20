@@ -1,0 +1,955 @@
+openapi: 3.0.0
+info:
+  title: Google Forms klooni API
+  version: "1.0.0"
+  description: >
+    Google Forms sarnase teenuse OpenAPI näidisspetsifikatsioon.
+    Kasutab ressursside nimedena üksikuid mitmuse nimisõnu ja /sessions autentimiseks.
+
+servers:
+  - url: /
+    description: Tootmisserver
+
+tags:
+  - name: forms
+    description: Vormide haldamisega seotud operatsioonid
+  - name: questions
+    description: Vormi küsimuste haldamisega seotud operatsioonid
+  - name: responses
+    description: Kasutajate vormivastustega seotud operatsioonid
+  - name: sessions
+    description: Kasutaja autentimisega (seansid) seotud operatsioonid
+  - name: users
+    description: Kasutajate haldamisega seotud operatsioonid
+
+paths:
+  /sessions:
+    post:
+      tags:
+        - sessions
+      summary: Loo uus seanss (sisselogimine)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionCreate"
+      responses:
+        "201":
+          description: Seanss on edukalt loodud (sisse logitud)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Vigased sisselogimisandmed
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      tags:
+        - sessions
+      summary: Lõpeta praegune seanss (väljalogimine)
+      operationId: deleteSession
+      responses:
+        "200":
+          description: Seanss on kustutatud (välja logitud)
+        "401":
+          description: Pole autentitud
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms:
+    get:
+      tags:
+        - forms
+      summary: Kuva kõik vormid
+      operationId: listForms
+      responses:
+        "200":
+          description: Vormide nimekiri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Form"
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - forms
+      summary: Loo uus vorm
+      operationId: createForm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormCreate"
+      responses:
+        "201":
+          description: Vorm on loodud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}:
+    get:
+      tags:
+        - forms
+      summary: Kuva konkreetse vormi üksikasjad
+      operationId: getForm
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vormi üksikasjad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    patch:
+      tags:
+        - forms
+      summary: Uuenda olemasoleva vormi osa
+      operationId: updateForm
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormUpdate"
+      responses:
+        "200":
+          description: Vorm on uuendatud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - forms
+      summary: Kustuta vorm
+      operationId: deleteForm
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Vorm on kustutatud
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/questions:
+    get:
+      tags:
+        - questions
+      summary: Kuva kõik konkreetse vormi küsimused
+      operationId: listQuestions
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vormi küsimuste nimekiri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - questions
+      summary: Loo uus küsimus konkreetsele vormile
+      operationId: createQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionCreate"
+      responses:
+        "201":
+          description: Küsimus on loodud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/questions/{questionId}:
+    get:
+      tags:
+        - questions
+      summary: Kuva konkreetse küsimuse üksikasjad
+      operationId: getQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Küsimuse üksikasjad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Küsimust ei leitud
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    patch:
+      tags:
+        - questions
+      summary: Uuenda olemasoleva küsimuse osa
+      operationId: updateQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionUpdate"
+      responses:
+        "200":
+          description: Küsimus on uuendatud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+        "404":
+          description: Küsimust ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - questions
+      summary: Kustuta küsimus
+      operationId: deleteQuestion
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Küsimus on kustutatud
+        "404":
+          description: Küsimust ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/responses:
+    get:
+      tags:
+        - responses
+      summary: Kuva kõik konkreetse vormi vastused
+      operationId: listResponses
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vormi vastuste nimekiri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Response"
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - responses
+      summary: Loo vastus konkreetsele vormile
+      operationId: createResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseCreate"
+      responses:
+        "201":
+          description: Vastus on loodud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: Vormi ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /forms/{formId}/responses/{responseId}:
+    get:
+      tags:
+        - responses
+      summary: Kuva konkreetse vastuse üksikasjad
+      operationId: getResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vastuse üksikasjad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: Vastust ei leitud
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    patch:
+      tags:
+        - responses
+      summary: Uuenda olemasoleva vastuse osa
+      operationId: updateResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseUpdate"
+      responses:
+        "200":
+          description: Vastus on uuendatud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: Vastust ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      tags:
+        - responses
+      summary: Kustuta vastus
+      operationId: deleteResponse
+      parameters:
+        - name: formId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: responseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Vastus on kustutatud
+        "404":
+          description: Vastust ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+  /users:
+    get:
+      tags:
+        - users
+      summary: Kuva kõik kasutajad
+      operationId: listUsers
+      responses:
+        "200":
+          description: Kasutajate nimekiri
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      tags:
+        - users
+      summary: Loo uus kasutaja (registreeru)
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: Kasutaja on loodud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Päringus on puudu vajalikud väljad
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Päringus on puudu vajalikud väljad: email, parool ja nimi on nõutud. Parool peab olema vähemalt 8 tähemärki pikk, Parool peab sisaldama vähemalt 3 järgnevast: suurtähed, väiketähed, numbrid, erimärgid"
+        "409":
+            description: Selle emailiga kasutaja on juba olemas
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+
+  /users/{userId}:
+    get:
+      tags:
+        - users
+      summary: Kuva konkreetse kasutaja üksikasjad
+      operationId: getUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Kasutaja üksikasjad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Kasutajat ei leitud
+        "401":
+          description: Autoriseerimata
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+    patch:
+      tags:
+        - users
+      summary: Uuenda olemasoleva kasutaja osa
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Kasutaja on uuendatud
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Kasutajat ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+    delete:
+      tags:
+        - users
+      summary: Kustuta kasutaja
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Kasutaja on kustutatud
+        "404":
+          description: Kasutajat ei leitud
+        "401":
+          description: Autoriseerimata
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+      security:
+        - BearerAuth: [ ]
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Vigane päring - vigased sisendparameetrid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    ServerError:
+      description: Serveri sisemine viga
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+
+    SessionCreate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - email
+        - password
+
+    Session:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT või seansi märgis
+        userId:
+          type: string
+          description: Autenditud kasutaja unikaalne identifikaator
+      required:
+        - token
+        - userId
+
+    FormCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - title
+
+    FormUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+
+    Form:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Vormi unikaalne identifikaator
+        userId:
+          type: integer
+          description: Vormi loonud kasutaja ID
+        title:
+          type: string
+          description: Vormi pealkiri
+        description:
+          type: string
+          description: Vormi kirjeldus
+        createdAt:
+          type: string
+          format: date-time
+          description: Loomise ajatempel
+        updatedAt:
+          type: string
+          format: date-time
+          description: Viimase uuenduse ajatempel
+      required:
+        - id
+        - userId
+        - title
+        - description
+        - createdAt
+        - updatedAt
+
+    QuestionCreate:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [shorttext, paragraph, multiplechoice, checkbox, dropdown]
+        options:
+          type: array
+          items:
+            type: string
+      required:
+        - text
+        - type
+
+    QuestionUpdate:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [shorttext, paragraph, multiplechoice, checkbox, dropdown]
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        type:
+          type: string
+          enum: [shorttext, paragraph, multiplechoice, checkbox, dropdown]
+        options:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - text
+        - type
+        - createdAt
+        - updatedAt
+
+    ResponseCreate:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+            required:
+              - questionId
+              - answer
+      required:
+        - answers
+
+    ResponseUpdate:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+
+    Response:
+      type: object
+      properties:
+        id:
+          type: string
+        formId:
+          type: string
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+            required:
+              - questionId
+              - answer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - formId
+        - answers
+        - createdAt
+        - updatedAt
+
+    UserCreate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        name:
+          type: string
+      required:
+        - email
+        - password
+        - name
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        name:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        passwordUpdated:
+          type: boolean
+          description: Kas parool on uuendatud pärast viimast sisselogimist
+      required:
+        - id
+        - email
+        - name
+        - createdAt
+        - updatedAt
+        - passwordUpdated
